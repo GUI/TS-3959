@@ -17,23 +17,29 @@ Thread.new do
   end
 end
 
-Net::HTTP.start("127.0.0.1", 8080) do |http|
-  i = 0
-  while(true)
-    i += 1
+threads = []
+20.times do
+  threads << Thread.new do
+    Net::HTTP.start("127.0.0.1", 8080) do |http|
+      i = 0
+      while(true)
+        i += 1
 
-    begin
-      response = http.get("/")
+        begin
+          response = http.get("/")
 
-      if(response.code == "200")
-        print "."
-        print "\n" if(i % 80 == 0)
-      else
-        puts "\nERROR: #{response.code}"
-        puts response.body
+          if(response.code == "200")
+            print "."
+            #print "\n" if(i % 80 == 0)
+          else
+            puts "\nERROR: #{response.code}"
+            puts response.body
+          end
+        rescue => e
+          puts "\nERROR: #{e.class} - #{e}"
+        end
       end
-    rescue => e
-      puts "\nERROR: #{e.class} - #{e}"
     end
   end
 end
+threads.each { |thread| thread.join }
